@@ -33,6 +33,7 @@ Make sure python is properly installed. Then a virtual env can be set up with th
 ```shell
 python -m venv venv
 source venv/bin/activate
+pip install -r requirements.txt
 ```
 
 ### run scripts
