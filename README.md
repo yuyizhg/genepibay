@@ -16,7 +16,7 @@ The initial step involves extracting relevant data from the OMIM database. This 
 ### Data Preprocessing and Model Building
 After obtaining the raw data, the next step is to preprocess this data and build the Bayesian Network model. This process is detailed in the Jupyter notebook `Bayesian Network for Genetic Epilepsy Diagnostic.py`.
 
-- Notebook: `Bayesian Network for Genetic Epilepsy Diagnostic.py`
+- Script: `BayesianNetwork4GeneticEpilepsyDiagnostic.py`
 - Purpose: Preprocess data and construct the Bayesian Network model
 
 

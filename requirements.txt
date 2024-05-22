@@ -1,0 +1,9 @@
+requests
+urllib3<2
+pandas
+pgmpy
+matplotlib
+seaborn
+flask
+nbformat
+nbconvert
