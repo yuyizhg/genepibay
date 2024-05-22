@@ -40,14 +40,16 @@ pip install -r requirements.txt
 
 ```shell
 pwd
-## make sure this is under the genepibay directory
+## Make sure this is under the genepibay directory
 
 # data preparation
 python clinical2.py
+## This may take a minute or two to run, and upon completion will generate a seizure_epilepsy.json file
 
 # data preprocessing and model building
-python Bayesian Network for Genetic Epilepsy Diagnostic.py
+python BayesianNetwork4GeneticEpilepsyDiagnostic.py 
+## This will take longer time, about 5 minutes.
 
 # web application
-
+python web.py
 ```
