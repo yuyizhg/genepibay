@@ -25,3 +25,28 @@ To provide an interface for interacting with the model, a web application is bui
 
 - Script: `web.py`
 - Functionality: Web application for model interaction
+
+## How to Run
+### env setup
+Make sure python is properly installed. Then a virtual env can be set up with the following commands:
+
+```shell
+python -m venv venv
+source venv/bin/activate
+```
+
+### run scripts
+
+```shell
+pwd
+## make sure this is under the genepibay directory
+
+# data preparation
+python clinical2.py
+
+# data preprocessing and model building
+python Bayesian Network for Genetic Epilepsy Diagnostic.py
+
+# web application
+
+```
