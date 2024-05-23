@@ -2,6 +2,7 @@
 # 1. Import preperation
 import pandas as pd
 import json
+import sys
 import pgmpy
 from pgmpy.models import BayesianNetwork
 from pgmpy.estimators import BayesianEstimator
@@ -11,6 +12,8 @@ import networkx as nx
 import matplotlib.pyplot as plt
 import seaborn as sns
 
+inputs = sys.argv[1:]  # Collect all arguments passed to the script
+print(f"Running with input: {inputs}")
 
 # Define the path to your JSON file in your local environment
 json_file_path = 'seizure_epilepsy.json'
@@ -27,14 +30,14 @@ df = pd.DataFrame(data)
 df1 = df.drop_duplicates(subset=['mimNumber']).reset_index(drop=True)
 # Remove mimNumber column
 df2 = df1[['preferredTitle', 'clinicalSynopsis']]
-print(df2)
+#print(df2)
 
 # One-hot encoding
 # Splitting the strings in 'clinicalSynopsis' into individual labels and creating a new DataFrame
 expanded_df= df2['clinicalSynopsis'].apply(pd.Series).stack().reset_index(level=1, drop=True).to_frame('label')
 # One-hot encoding the labels
 one_hot_encoded = pd.get_dummies(expanded_df, prefix='', prefix_sep='')
-print(one_hot_encoded)
+#print(one_hot_encoded)
 
 # Group by index and sum up rows with the same index
 summed_up_rows = one_hot_encoded.groupby(one_hot_encoded.index).sum()
@@ -42,11 +45,11 @@ summed_up_rows = one_hot_encoded.groupby(one_hot_encoded.index).sum()
 df3 = pd.concat([df2['preferredTitle'], summed_up_rows], axis=1)
 # Remove "'" symbol from column names
 df3.columns = df3.columns.str.replace("'", "")
-print(df3)
+#print(df3)
 
 # Remove records with null value in clinicalSynopsis
 df4 = df3.dropna(subset=['Ballooned neurons with autofluorescent fine granular material']).reset_index(drop=True)
-print(df4)
+#print(df4)
 
 # Check for duplicated column names
 duplicated_columns = df4.columns[df4.columns.duplicated()]
@@ -68,7 +71,7 @@ for column in duplicated_columns:
 df4_cleaned = df4.drop(columns=duplicated_columns)
 # Concatenate the original DataFrame and the DataFrame with summed values
 df5 = pd.concat([df4_cleaned, summed_df], axis=1)
-print(df5)
+#print(df5)
 
 
 # Copy the dataframe
@@ -77,7 +80,7 @@ df6 = df5.iloc[:, 1:]
 df6 = df6.where((df6 == 0) | (df6 == 1), 1)
 # Concatenating the adjusted DataFrame with the 'preferredTitle' column
 df6 = pd.concat([df5['preferredTitle'], df6], axis=1)
-print(df6)
+#print(df6)
 
 
 
@@ -90,8 +93,8 @@ structure = [("preferredTitle", symptom) for symptom in df6.columns[1:]]
 model = BayesianNetwork()
 for edge in structure:
     model.add_edge(*edge)
-print("Number of edges: {}".format(len(model.edges())))
-print("Number of nodes: {}".format(len(model.nodes())))
+#print("Number of edges: {}".format(len(model.edges())))
+#print("Number of nodes: {}".format(len(model.nodes())))
 
 # 3.2 Learn the model parameters from the data
 # Estimate parameters using Bayesian Estimator
@@ -122,25 +125,30 @@ def to_str_top_k_results(factor, k=10, tablefmt="grid"):
 
 # Create VariableElimination
 ve = VariableElimination(model)
-# Run query without observing any symptoms
-query_result = ve.query(variables=['preferredTitle'])
-# Check results
-print(to_str_top_k_results(query_result))
+# # Run query without observing any symptoms
+# query_result = ve.query(variables=['preferredTitle'])
+# # Check results
+# print(to_str_top_k_results(query_result))
 
 
 
 # 2.4 Query the network with evidence
 # 2.41 Sample 1
 # Run query based on given symptoms
-evidence = {'Status epilepticus': 1.0, 'Myoclonic seizures': 1.0}
-query_result = ve.query(variables=['preferredTitle'], evidence=evidence)
-# Check results
-print(to_str_top_k_results(query_result))
+# evidence = {'Status epilepticus': 1.0, 'Myoclonic seizures': 1.0}
+# query_result = ve.query(variables=['preferredTitle'], evidence=evidence)
+# # Check results
+# print(to_str_top_k_results(query_result))
 
 
 # Run query based on given symptoms
-evidence = {'Status epilepticus': 1.0, 'Myoclonic seizures': 1.0, 'Deterioration of cognitive function': 1.0}
+# evidence = {'Status epilepticus': 1.0, 'Myoclonic seizures': 1.0, 'Deterioration of cognitive function': 1.0}
+# query_result = ve.query(variables=['preferredTitle'], evidence=evidence)
+# # Check results
+# print(to_str_top_k_results(query_result))
+
+
+evidence = {inp: 1.0 for inp in inputs} 
 query_result = ve.query(variables=['preferredTitle'], evidence=evidence)
 # Check results
 print(to_str_top_k_results(query_result))
-

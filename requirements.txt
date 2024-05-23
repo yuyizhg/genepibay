@@ -5,5 +5,3 @@ pgmpy
 matplotlib
 seaborn
 flask
-nbformat
-nbconvert

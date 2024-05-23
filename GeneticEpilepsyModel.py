@@ -1,5 +1,3 @@
-from flask import Flask, request, render_template_string
-import subprocess
 
 # 1. Import preperation
 import pandas as pd
@@ -14,73 +12,7 @@ import networkx as nx
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-app = Flask(__name__)
-ve = None
-
-
-# HTML template with a form and a multiple selection box
-html_template = '''
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Multiple Selection Form</title>
-</head>
-<body>
-    <h1>Select your inputs</h1>
-    <form method="post">
-        <label for="user_inputs">Choose multiple options:</label>
-        <select id="user_inputs" name="user_inputs" multiple size="3">
-            <option value="Status epilepticus">Status epilepticus</option>
-            <option value="Myoclonic seizures">Myoclonic seizures</option>
-            <option value="Deterioration of cognitive function">Deterioration of cognitive function</option>
-        </select>
-        <button type="submit">Submit</button>
-    </form>
-    {% if output %}
-        <h2>Output:</h2>
-        <pre>{{ output }}</pre>
-    {% endif %}
-</body>
-</html>
-'''
-
-# 3.3 Query the network without evidence
-def to_str_top_k_results(factor, k=10, tablefmt="grid"):
-    from pgmpy.extern import tabulate
-    """
-    Parameters
-    ----------
-    factor: DiscreteFactor object from pgmpy
-    k: The nuber of top variables you would like to print
-
-    returns table
-    """
-    # Create a list of all rows
-    all_rows = list(zip(factor.state_names[factor.variables[0]],
-                factor.values))
-    # Sort by values and create a table
-    top_k = sorted(all_rows, key=lambda tup: tup[1])[::-1][:k]
-    table = tabulate(top_k, headers = ['dx','p(dx)'],
-                        tablefmt=tablefmt)
-    return table
-
-@app.route('/', methods=['GET', 'POST'])
-def index():
-    output = None
-    if request.method == 'POST':
-        user_inputs = request.form.getlist('user_inputs')
-        # Call run.py with the user inputs as separate arguments
-        global ve
-        evidence = {inp: 1.0 for inp in user_inputs} 
-        query_result = ve.query(variables=['preferredTitle'], evidence=evidence)
-        # Check results
-        output = to_str_top_k_results(query_result)
-    return render_template_string(html_template, output=output)
-
-# @app.before_first_request
-def initialize_model():
+def create_model():
     # Define the path to your JSON file in your local environment
     json_file_path = 'seizure_epilepsy.json'
     # Read JSON data
@@ -166,12 +98,29 @@ def initialize_model():
     # Estimate parameters using Bayesian Estimator
     model.fit(df6, estimator=BayesianEstimator)
 
+
+
+    # 3.3 Query the network without evidence
+    def to_str_top_k_results(factor, k=10, tablefmt="grid"):
+        from pgmpy.extern import tabulate
+        """
+        Parameters
+        ----------
+        factor: DiscreteFactor object from pgmpy
+        k: The nuber of top variables you would like to print
+
+        returns table
+        """
+        # Create a list of all rows
+        all_rows = list(zip(factor.state_names[factor.variables[0]],
+                    factor.values))
+        # Sort by values and create a table
+        top_k = sorted(all_rows, key=lambda tup: tup[1])[::-1][:k]
+        table = tabulate(top_k, headers = ['dx','p(dx)'],
+                            tablefmt=tablefmt)
+        return table
+
+
     # Create VariableElimination
-    global ve
     ve = VariableElimination(model)
-
-
-if __name__ == '__main__':
-    print('Starting webapp, initializing model...')
-    initialize_model()
-    app.run(debug=True)
+    return ve
