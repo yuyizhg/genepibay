@@ -8,11 +8,14 @@ from pgmpy.models import BayesianNetwork
 from pgmpy.estimators import BayesianEstimator
 from pgmpy.inference import VariableElimination
 
-import networkx as nx
-import matplotlib.pyplot as plt
-import seaborn as sns
+# import networkx as nx
+# import matplotlib.pyplot as plt
+# import seaborn as sns
 
-def create_model():
+
+
+
+def initialize_model():
     # Define the path to your JSON file in your local environment
     json_file_path = 'seizure_epilepsy.json'
     # Read JSON data
@@ -49,12 +52,12 @@ def create_model():
     df4 = df3.dropna(subset=['Ballooned neurons with autofluorescent fine granular material']).reset_index(drop=True)
     #print(df4)
 
-    # Check for duplicated column names
-    duplicated_columns = df4.columns[df4.columns.duplicated()]
-    if len(duplicated_columns) > 0:
-        print("Duplicate column names found:", duplicated_columns)
-    else:
-        print("No duplicate column names found.")
+    # # Check for duplicated column names
+    # duplicated_columns = df4.columns[df4.columns.duplicated()]
+    # if len(duplicated_columns) > 0:
+    #     print("Duplicate column names found:", duplicated_columns)
+    # else:
+    #     print("No duplicate column names found.")
 
 
     # Deal with duplicated columns
@@ -98,29 +101,7 @@ def create_model():
     # Estimate parameters using Bayesian Estimator
     model.fit(df6, estimator=BayesianEstimator)
 
-
-
-    # 3.3 Query the network without evidence
-    def to_str_top_k_results(factor, k=10, tablefmt="grid"):
-        from pgmpy.extern import tabulate
-        """
-        Parameters
-        ----------
-        factor: DiscreteFactor object from pgmpy
-        k: The nuber of top variables you would like to print
-
-        returns table
-        """
-        # Create a list of all rows
-        all_rows = list(zip(factor.state_names[factor.variables[0]],
-                    factor.values))
-        # Sort by values and create a table
-        top_k = sorted(all_rows, key=lambda tup: tup[1])[::-1][:k]
-        table = tabulate(top_k, headers = ['dx','p(dx)'],
-                            tablefmt=tablefmt)
-        return table
-
-
     # Create VariableElimination
     ve = VariableElimination(model)
-    return ve
+
+    return ve, df6.columns[1:].tolist()
